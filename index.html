@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NextGen Election Portal</title>
+    <!-- Modern Google Font: Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Background glowing decorative elements -->
+    <div class="glow-orb orb-1"></div>
+    <div class="glow-orb orb-2"></div>
+
+    <div class="app-wrapper">
+        <div class="container">
+            <!-- Landing Page -->
+            <div id="landing-page" class="view active">
+                <div class="header-text">
+                    <div class="logo-icon">🗳️</div>
+                    <h1>E-Vote Portal</h1>
+                    <p>Next-generation secure voting infrastructure.</p>
+                </div>
+                <div class="button-group">
+                    <button onclick="navigate('voter-auth-page')" class="btn primary btn-large">Voter Portal</button>
+                    <button onclick="navigate('admin-login-page')" class="btn secondary">Admin Dashboard</button>
+                </div>
+            </div>
+
+            <!-- Admin Login -->
+            <div id="admin-login-page" class="view">
+                <div class="header-text">
+                    <h2>Admin Access</h2>
+                    <p>Enter your credentials to manage the election.</p>
+                </div>
+                <form id="admin-login-form" onsubmit="handleAdminLogin(event)">
+                    <div class="input-group">
+                        <label>Username</label>
+                        <input type="text" id="admin-username" placeholder="Enter admin username" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Password</label>
+                        <input type="password" id="admin-password" placeholder="Enter admin password" required>
+                    </div>
+                    <button type="submit" class="btn primary">Authenticate</button>
+                    <button type="button" onclick="navigate('landing-page')" class="btn outline">Cancel</button>
+                    <p id="admin-error" class="error"></p>
+                </form>
+            </div>
+
+            <!-- Admin Dashboard -->
+            <div id="admin-dashboard" class="view admin-view">
+                <div class="dashboard-header">
+                    <div>
+                        <h2>Command Center</h2>
+                        <p class="subtitle">Live election metrics and voter database</p>
+                    </div>
+                    <button onclick="logout()" class="btn outline danger-outline logout-btn">Logout</button>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon gradient-blue">📊</div>
+                        <div>
+                            <h3>Total Votes Cast</h3>
+                            <p id="total-votes" class="stat-number">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon gradient-red">🛡️</div>
+                        <div>
+                            <h3>Security Blocks</h3>
+                            <p id="duplicate-votes" class="stat-number">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-section">
+                    <h3>Live Party Standings</h3>
+                    <div id="party-stats" class="party-stats-container"></div>
+                </div>
+
+                <div class="dashboard-section">
+                    <h3>Voter Registry</h3>
+                    <div class="search-container">
+                        <input type="text" id="search-voter" placeholder="Search by Name or Voter ID..." onkeyup="filterVoters()">
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table id="voter-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Voter ID</th>
+                                    <th>Age</th>
+                                    <th>Status</th>
+                                    <th>Selection</th>
+                                </tr>
+                            </thead>
+                            <tbody id="voter-table-body">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Voter Auth Selection -->
+            <div id="voter-auth-page" class="view">
+                <div class="header-text">
+                    <h2>Voter Identification</h2>
+                    <p>Select an authentication method to proceed.</p>
+                </div>
+                <div class="button-group">
+                    <button onclick="navigate('voter-signin-page')" class="btn primary">Login with Voter ID</button>
+                    <button onclick="navigate('voter-signup-page')" class="btn secondary">Register (New Voter)</button>
+                    <button onclick="navigate('landing-page')" class="btn outline">Back to Home</button>
+                </div>
+            </div>
+
+            <!-- Voter Sign Up -->
+            <div id="voter-signup-page" class="view">
+                <div class="header-text">
+                    <h2>KYC Registration</h2>
+                    <p>Verify identity via Aadhaar to generate your Voter ID.</p>
+                </div>
+                
+                <!-- Step 1: Enter Aadhaar -->
+                <form id="aadhaar-form" onsubmit="fetchAadhaarDetails(event)">
+                    <div class="input-group">
+                        <label>12-Digit Aadhaar Number</label>
+                        <input type="text" id="reg-aadhaar" placeholder="e.g. 123456789012" maxlength="12" pattern="\d{12}" required>
+                    </div>
+                    <button type="submit" class="btn primary">Verify Identity</button>
+                    <button type="button" onclick="navigate('voter-auth-page')" class="btn outline">Back</button>
+                    <p id="aadhaar-error" class="error"></p>
+                </form>
+
+                <!-- Step 2: Confirm Details -->
+                <form id="signup-form" style="display: none;" onsubmit="handleSignup(event)">
+                    <div class="confirmation-box">
+                        <div class="confirm-header">Identity Verified ✅</div>
+                        <div class="confirm-grid">
+                            <p><span>Full Name</span> <strong id="confirm-name"></strong></p>
+                            <p><span>Age</span> <strong id="confirm-age"></strong></p>
+                            <p><span>Mobile</span> <strong id="confirm-mobile"></strong></p>
+                            <p class="full-width"><span>Registered Address</span> <strong id="confirm-address"></strong></p>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn success">Generate Voter ID</button>
+                    <button type="button" onclick="resetSignup()" class="btn outline">Cancel</button>
+                    <p id="signup-msg"></p>
+                </form>
+            </div>
+
+            <!-- Voter Sign In -->
+            <div id="voter-signin-page" class="view">
+                <div class="header-text">
+                    <h2>Secure Voting Kiosk</h2>
+                    <p>Enter your 6-digit assigned Voter ID.</p>
+                </div>
+                <form id="signin-form" onsubmit="handleSignin(event)">
+                    <div class="input-group">
+                        <label>Voter ID</label>
+                        <input type="text" id="login-voter-id" placeholder="e.g. XYZ123" maxlength="6" required style="text-transform: uppercase;">
+                    </div>
+                    <button type="submit" class="btn primary">Authenticate</button>
+                    <button type="button" onclick="navigate('voter-auth-page')" class="btn outline">Back</button>
+                    <p id="signin-error" class="error"></p>
+                </form>
+            </div>
+
+            <!-- Voting Page -->
+            <div id="voting-page" class="view">
+                <div class="header-text">
+                    <h2>Digital Ballot</h2>
+                    <p>Verified as: <strong id="current-voter-name" class="highlight-text"></strong></p>
+                </div>
+                <form id="voting-form" onsubmit="handleVote(event)">
+                    <div id="ballot" class="ballot-container"></div>
+                    <div class="submit-container">
+                        <button type="submit" class="btn success btn-large shadow glow-button">Submit Vote Securely</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Thank You Page -->
+            <div id="thank-you-page" class="view">
+                <div class="success-illustration">🎉</div>
+                <div class="header-text">
+                    <h2>Vote Recorded!</h2>
+                    <p>Your vote has been encrypted and stored on the secure ledger.</p>
+                </div>
+                <button onclick="logout()" class="btn primary">Return to Dashboard</button>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
